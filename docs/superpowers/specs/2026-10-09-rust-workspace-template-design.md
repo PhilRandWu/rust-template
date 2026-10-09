@@ -22,11 +22,11 @@
 模板发布后，新项目通过以下命令生成：
 
 ```bash
-cargo install cargo-generate
-cargo generate --git https://github.com/<owner>/<repo>.git rust-workspace --name my-app
+cargo install cargo-generate --locked
+cargo generate --git https://github.com/<owner>/<repo>.git template --name my-app
 ```
 
-其中 `rust-workspace` 是仓库内模板子目录。生成过程中使用 `cargo-generate` 的 Liquid 占位符能力处理项目名称、目录名称、包名、作者、描述和仓库信息。
+`template` 是仓库内模板子目录；也可以写成 `--subfolder template`。生成过程中使用 `cargo-generate` 的 Liquid 占位符能力处理项目名称、目录名称、包名、作者、描述和仓库信息。
 
 初始变量约定：
 
@@ -48,9 +48,11 @@ rust-template/
 ├── README.md
 ├── docs/
 │   └── superpowers/
-│       └── specs/
-│           └── 2026-10-09-rust-workspace-template-design.md
-└── rust-workspace/
+│       ├── specs/
+│       │   └── 2026-10-09-rust-workspace-template-design.md
+│       └── plans/
+│           └── 2026-10-09-rust-workspace-template.md
+└── template/
     ├── cargo-generate.toml
     ├── Cargo.toml.liquid
     ├── README.md.liquid
@@ -58,7 +60,6 @@ rust-template/
     ├── LICENSE-APACHE
     ├── rust-toolchain.toml
     ├── rustfmt.toml
-    ├── clippy.toml
     ├── deny.toml
     ├── .editorconfig
     ├── .gitignore
@@ -72,18 +73,16 @@ rust-template/
     │   └── development.md
     ├── scripts/
     │   └── coverage.sh
-    ├── crates/
-    │   ├── {{project-name}}-core/
-    │   │   ├── Cargo.toml.liquid
-    │   │   └── src/lib.rs
-    │   └── {{project-name}}-cli/
-    │       ├── Cargo.toml.liquid
-    │       └── src/main.rs
-    └── tests/
-        └── smoke_test.rs
+    └── crates/
+        ├── {{project-name}}-core/
+        │   ├── Cargo.toml.liquid
+        │   └── src/lib.rs
+        └── {{project-name}}-cli/
+            ├── Cargo.toml.liquid
+            ├── src/main.rs
+            └── tests/
+                └── smoke_test.rs
 ```
-
-实现时以 `cargo-generate` 对模板子目录和 Liquid 文件后缀的实际规则为准；若当前版本要求固定模板配置文件名，则保留 `cargo-generate.toml`，并在其中声明模板元数据、提示变量和忽略规则。
 
 ## 4. 生成后的项目结构
 
@@ -96,7 +95,6 @@ my-app/
 ├── LICENSE-APACHE
 ├── rust-toolchain.toml
 ├── rustfmt.toml
-├── clippy.toml
 ├── deny.toml
 ├── .editorconfig
 ├── .gitignore
@@ -110,15 +108,15 @@ my-app/
 │   └── development.md
 ├── scripts/
 │   └── coverage.sh
-├── crates/
-│   ├── my-app-core/
-│   │   ├── Cargo.toml
-│   │   └── src/lib.rs
-│   └── my-app-cli/
-│       ├── Cargo.toml
-│       └── src/main.rs
-└── tests/
-    └── smoke_test.rs
+└── crates/
+    ├── my-app-core/
+    │   ├── Cargo.toml
+    │   └── src/lib.rs
+    └── my-app-cli/
+        ├── Cargo.toml
+        ├── src/main.rs
+        └── tests/
+            └── smoke_test.rs
 ```
 
 ### 4.1 `my-app-core`
@@ -137,8 +135,9 @@ my-app/
 - 使用 `clap` 的 derive API 解析参数；
 - 使用 `tracing` 和 `tracing-subscriber` 初始化日志；
 - 调用 `my-app-core` 暴露的函数；
-- 使用 `thiserror` 定义示例错误；
-- 在 `main` 中统一处理错误并返回合适的进程退出状态。
+- 使用 `thiserror` 处理示例错误；
+- 在 `main` 中统一处理错误并返回合适的进程退出状态；
+- 在 crate 自己的 `tests/` 目录中放置端到端冒烟测试。
 
 ## 5. Workspace 与依赖策略
 
@@ -154,6 +153,8 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 ```
 
 默认不引入 `tokio`。若生成项目未来发展为异步服务，可在具体项目中显式添加异步运行时。
+
+模板不额外声明 MSRV；`rust-toolchain.toml` 指定使用当前 stable。由于 Rust 2024 本身需要支持 2024 edition 的编译器，使用者应更新 stable 工具链。
 
 ## 6. 格式化与质量约束
 
@@ -183,9 +184,10 @@ reorder_modules = true
 unsafe_code = "forbid"
 
 [workspace.lints.clippy]
-all = "warn"
-cargo = "warn"
-pedantic = "warn"
+all = { level = "warn", priority = -1 }
+cargo = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+cargo-common-metadata = "allow"
 ```
 
 各 crate 使用：
@@ -217,8 +219,8 @@ CI 对 Clippy 和文档使用 `-D warnings`。
 
 1. checkout 模板仓库；
 2. 安装 stable Rust；
-3. 安装 `cargo-generate`；
-4. 在临时目录基于 `rust-workspace` 生成示例项目；
+3. 安装 `cargo-generate`、`cargo-deny` 和 `cargo-tarpaulin`；
+4. 在临时目录基于 `template` 生成示例项目；
 5. 进入生成项目执行：
    - `cargo fmt --all -- --check`；
    - `cargo clippy --workspace --all-targets --all-features -- -D warnings`；
@@ -227,6 +229,8 @@ CI 对 Clippy 和文档使用 `-D warnings`。
    - `cargo deny check`；
    - `scripts/coverage.sh` 生成 `lcov.info`；
 6. 上传 `lcov.info` 为构建产物。
+
+自动化生成时通过 `--define` 提供 `description` 和 `github_repo`，避免 CI 等待交互输入。
 
 ### 7.2 生成项目 CI
 
@@ -302,22 +306,11 @@ pre-commit run --all-files
 
 ### 9.2 `docs/architecture.md`
 
-说明：
-
-- workspace 分层；
-- core 与 CLI 的职责边界；
-- 新增 crate 的推荐位置；
-- 依赖方向；
-- 错误处理和日志约定。
+说明 workspace 分层、core 与 CLI 的职责边界、新增 crate 的推荐位置、依赖方向、错误处理和日志约定。
 
 ### 9.3 `docs/development.md`
 
-说明：
-
-- 本地环境要求；
-- 常用 `just` 命令；
-- pre-commit 安装；
-- 测试、文档和覆盖率生成方式。
+说明本地环境要求、常用 `just` 命令、pre-commit 安装、测试、文档和覆盖率生成方式。
 
 模板仓库根 README 面向模板维护者和使用者，说明如何安装 `cargo-generate`、如何生成项目、模板包含哪些检查，以及模板仓库自身 CI 的验证方式。
 
@@ -335,7 +328,7 @@ pre-commit run --all-files
 
 模板完成后，应满足：
 
-1. 可以通过 `cargo generate` 从 `rust-workspace` 子目录生成新项目；
+1. 可以通过 `cargo generate` 从 `template` 子目录生成新项目；
 2. 生成后的 crate 名称、目录名称和包名与输入项目名一致；
 3. 生成项目可以运行 `cargo fmt --all -- --check`；
 4. 生成项目可以运行 `cargo clippy --workspace --all-targets --all-features -- -D warnings`；
@@ -345,3 +338,4 @@ pre-commit run --all-files
 8. 可以生成 `lcov.info`；
 9. 模板仓库 CI 能先生成项目再验证项目；
 10. README 和开发文档清晰说明使用方式、目录约定和质量检查。
+

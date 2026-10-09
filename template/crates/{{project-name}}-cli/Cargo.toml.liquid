@@ -1,0 +1,21 @@
+{% assign package_name = crate_name | replace: "_", "-" %}[package]
+name = "{{package_name}}-cli"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "{{package_name}}"
+path = "src/main.rs"
+
+[dependencies]
+{{package_name}}-core = { workspace = true }
+clap = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+[lints]
+workspace = true

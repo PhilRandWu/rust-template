@@ -1,0 +1,105 @@
+{% assign package_name = crate_name | replace: "_", "-" %}# {{package_name}}
+
+> {{description}}
+
+## 功能特性
+
+- Rust 2024 workspace
+- 可复用核心库
+- 命令行入口
+- 格式化、Clippy、测试、文档和依赖检查
+- GitHub Actions CI 和 lcov 覆盖率产物
+
+## 快速开始
+
+### 环境要求
+
+- Rust stable
+
+### 运行
+
+```bash
+cargo run -p {{package_name}}-cli -- --name Rust
+```
+
+预期输出：
+
+```text
+Hello, Rust!
+```
+
+## 项目结构
+
+```text
+crates/
+├── {{package_name}}-core/  # 可复用领域逻辑
+└── {{package_name}}-cli/   # 命令行入口
+docs/                      # 架构和开发文档
+```
+
+## 开发命令
+
+```bash
+just fmt
+just clippy
+just test
+just doc
+just deny
+just coverage
+just ci
+```
+
+## CI 与覆盖率
+
+CI 会检查格式、Clippy、测试、文档和依赖，并生成 `lcov.info` 构建产物。覆盖率不会上传到第三方服务。
+
+## 文档
+
+- [架构说明](docs/architecture.md)
+- [开发指南](docs/development.md)
+
+## 贡献指南
+
+1. 新建特性分支；
+2. 补充或调整测试；
+3. 运行 `just ci`；
+4. 提交 Pull Request。
+
+## 许可证
+
+本项目采用 MIT OR Apache-2.0 双许可。
+
+---
+
+# English
+
+## Features
+
+- Rust 2024 workspace
+- Reusable core library
+- Command-line entry point
+- Formatting, linting, testing, docs, and dependency checks
+- GitHub Actions CI and an lcov coverage artifact
+
+## Quick Start
+
+```bash
+cargo run -p {{package_name}}-cli -- --name Rust
+```
+
+## Project Structure
+
+- `{{package_name}}-core`: reusable domain logic.
+- `{{package_name}}-cli`: command-line entry point.
+
+## Development
+
+Run `just ci` to execute all local quality checks.
+
+## Contributing
+
+Create a feature branch, update tests, run `just ci`, and open a pull request.
+
+## License
+
+Licensed under either of the Apache License, Version 2.0, or the MIT license, at your option.

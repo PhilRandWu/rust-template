@@ -1,0 +1,66 @@
+name: Template CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  template:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Install template tools
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-generate,cargo-deny,cargo-tarpaulin
+
+      - name: Generate sample project
+        run: >-
+          cargo generate
+          --path template
+          --name sample-app
+          --destination .generated
+          --define description="Sample application"
+          --define github_repo=
+          --define authors="Template Authors"
+          --vcs none
+
+      - name: Check formatting
+        working-directory: .generated/sample-app
+        run: cargo fmt --all -- --check
+
+      - name: Run Clippy
+        working-directory: .generated/sample-app
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+      - name: Run tests
+        working-directory: .generated/sample-app
+        run: cargo test --workspace --all-features
+
+      - name: Build docs
+        working-directory: .generated/sample-app
+        run: RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps
+
+      - name: Check dependencies
+        working-directory: .generated/sample-app
+        run: cargo deny check
+
+      - name: Generate coverage
+        working-directory: .generated/sample-app
+        run: ./scripts/coverage.sh
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: template-lcov
+          path: .generated/sample-app/lcov.info

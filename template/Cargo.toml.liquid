@@ -1,0 +1,36 @@
+{% assign package_name = crate_name | replace: "_", "-" %}[workspace]
+resolver = "2"
+members = [
+    "crates/{{package_name}}-core",
+    "crates/{{package_name}}-cli",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+authors = ["{{authors}}"]
+description = "{{description}}"
+license = "MIT OR Apache-2.0"
+{% if github_repo != "" %}
+repository = "https://github.com/{{github_repo}}"
+{% endif %}
+
+[workspace.dependencies]
+{{package_name}}-core = { path = "crates/{{package_name}}-core", version = "0.1.0" }
+clap = { version = "4", features = ["derive"] }
+thiserror = "2"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[profile.release]
+lto = true
+codegen-units = 1
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+cargo = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+cargo-common-metadata = "allow"

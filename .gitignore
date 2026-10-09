@@ -1,0 +1,11 @@
+# macOS
+.DS_Store
+
+# Editor files
+*.swp
+*.swo
+*~
+
+# Local generated test projects
+.generated/
+target/

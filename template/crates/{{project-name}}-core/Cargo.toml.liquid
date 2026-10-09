@@ -1,0 +1,13 @@
+{% assign package_name = crate_name | replace: "_", "-" %}[package]
+name = "{{package_name}}-core"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description.workspace = true
+license.workspace = true
+
+[dependencies]
+thiserror = { workspace = true }
+
+[lints]
+workspace = true

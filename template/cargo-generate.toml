@@ -1,0 +1,12 @@
+[template]
+cargo_generate_version = "0.23.7"
+
+[placeholders.description]
+type = "string"
+prompt = "Project description"
+default = "A Rust workspace project"
+
+[placeholders.github_repo]
+type = "string"
+prompt = "GitHub repository as owner/repo, or leave empty"
+default = ""
