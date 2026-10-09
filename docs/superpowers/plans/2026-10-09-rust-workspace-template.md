@@ -685,15 +685,16 @@ jobs:
           tool: cargo-generate,cargo-deny,cargo-tarpaulin
 
       - name: Generate sample project
-        run: >-
-          cargo generate
-          --path template
-          --name sample-app
-          --destination .generated
-          --define description="Sample application"
-          --define github_repo=
-          --define authors="Template Authors"
-          --vcs none
+        run: |
+          mkdir -p .generated
+          cargo generate \
+            --path template \
+            --name sample-app \
+            --destination .generated \
+            --define description="Sample application" \
+            --define github_repo= \
+            --define authors="Template Authors" \
+            --vcs none
 
       - name: Check formatting
         working-directory: .generated/sample-app
@@ -938,6 +939,7 @@ cargo generate --version
 
 ```bash
 rm -rf .generated/sample-app
+mkdir -p .generated
 cargo generate --path template --name sample-app --destination .generated \
   --define description="Sample application" --define github_repo= \
   --define authors="Template Authors" --vcs none
