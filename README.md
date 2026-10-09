@@ -24,7 +24,7 @@ cargo generate --path template --name my-app
 从 Git 仓库使用时：
 
 ```bash
-cargo generate --git https://github.com/<owner>/<repo>.git template --name my-app
+cargo generate --git https://github.com/PhilRandWu/rust-template.git template --name my-app
 ```
 
 生成后运行：

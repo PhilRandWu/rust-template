@@ -78,7 +78,7 @@ target/
 
 ```bash
 cargo install cargo-generate --locked
-cargo generate --git https://github.com/<owner>/<repo>.git template --name my-app
+cargo generate --git https://github.com/PhilRandWu/rust-template.git template --name my-app
 ```
 
 生成后进入项目目录并运行：

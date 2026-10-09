@@ -23,7 +23,7 @@
 
 ```bash
 cargo install cargo-generate --locked
-cargo generate --git https://github.com/<owner>/<repo>.git template --name my-app
+cargo generate --git https://github.com/PhilRandWu/rust-template.git template --name my-app
 ```
 
 `template` 是仓库内模板子目录；也可以写成 `--subfolder template`。生成过程中使用 `cargo-generate` 的 Liquid 占位符能力处理项目名称、目录名称、包名、作者、描述和仓库信息。
