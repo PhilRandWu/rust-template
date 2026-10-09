@@ -128,7 +128,7 @@ git commit -m "chore: add template repository base"
 
 ```toml
 [template]
-cargo_generate_version = "0.23.7"
+cargo_generate_version = ">=0.23.7"
 
 [placeholders.description]
 type = "string"
@@ -608,9 +608,9 @@ env:
 
 jobs:
   quality:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -649,7 +649,7 @@ jobs:
         run: ./scripts/coverage.sh
 
       - name: Upload coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: lcov
           path: lcov.info
@@ -670,9 +670,9 @@ env:
 
 jobs:
   template:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -720,7 +720,7 @@ jobs:
         run: ./scripts/coverage.sh
 
       - name: Upload coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: template-lcov
           path: .generated/sample-app/lcov.info
